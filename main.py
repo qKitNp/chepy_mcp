@@ -19,6 +19,22 @@ from features.decoders import (
     decode_hex_chepy,
     decode_binary_chepy,
 )
+from features.ciphers import (
+    rot13_encode,
+    caesar_encrypt,
+    atbash_encode,
+    rail_fence_encrypt,
+    vigenere_encrypt,
+    morse_encode,
+)
+from features.deciphers import (
+    rot13_decode,
+    caesar_decrypt,
+    atbash_decode,
+    rail_fence_decrypt,
+    vigenere_decrypt,
+    morse_decode,
+)
 from enum import Enum
 
 mcp = FastMCP()
@@ -149,6 +165,89 @@ def decoder(
             raise Exception(f"Unsupported decoder type: {decoder_type}")
     except Exception as e:
         raise Exception(f"Failed to decode string using {decoder_type}: {e}")
+
+
+class CipherType(str, Enum):
+    ROT13 = "rot13"
+    CAESAR = "caesar"
+    ATBASH = "atbash"
+    RAIL_FENCE = "rail_fence"
+    VIGENERE = "vigenere"
+    MORSE = "morse"
+
+
+@mcp.tool()
+def cipher(
+    input_string: str,
+    cipher_type: CipherType,
+    key: str = "",
+    shift: int = 3,
+    num_rails: int = 2,
+) -> str:
+    """
+    Encode a string using classical ciphers (rot13, caesar, atbash, rail fence, vigenere, morse).
+    Args:
+        input_string (str): The string to encode.
+        cipher_type (CipherType): The cipher to use.
+        key (str): The key for vigenere cipher (required for vigenere).
+        shift (int): The shift for caesar cipher (default 3).
+        num_rails (int): The number of rails for rail fence cipher (default 2).
+    Returns:
+        str: The encoded string.
+    """
+    if cipher_type == CipherType.ROT13:
+        return rot13_encode(input_string)
+    elif cipher_type == CipherType.CAESAR:
+        return caesar_encrypt(input_string, shift)
+    elif cipher_type == CipherType.ATBASH:
+        return atbash_encode(input_string)
+    elif cipher_type == CipherType.RAIL_FENCE:
+        return rail_fence_encrypt(input_string, num_rails)
+    elif cipher_type == CipherType.VIGENERE:
+        if not key:
+            raise ValueError("Key is required for vigenere cipher.")
+        return vigenere_encrypt(input_string, key)
+    elif cipher_type == CipherType.MORSE:
+        return morse_encode(input_string)
+    else:
+        raise ValueError(f"Unsupported cipher type: {cipher_type}")
+
+
+@mcp.tool()
+def decipher(
+    input_string: str,
+    cipher_type: CipherType,
+    key: str = "",
+    shift: int = 3,
+    num_rails: int = 2,
+) -> str:
+    """
+    Decode a string using classical ciphers (rot13, caesar, atbash, rail fence, vigenere, morse).
+    Args:
+        input_string (str): The string to decode.
+        cipher_type (CipherType): The cipher to use.
+        key (str): The key for vigenere cipher (required for vigenere).
+        shift (int): The shift for caesar cipher (default 3).
+        num_rails (int): The number of rails for rail fence cipher (default 2).
+    Returns:
+        str: The decoded string.
+    """
+    if cipher_type == CipherType.ROT13:
+        return rot13_decode(input_string)
+    elif cipher_type == CipherType.CAESAR:
+        return caesar_decrypt(input_string, shift)
+    elif cipher_type == CipherType.ATBASH:
+        return atbash_decode(input_string)
+    elif cipher_type == CipherType.RAIL_FENCE:
+        return rail_fence_decrypt(input_string, num_rails)
+    elif cipher_type == CipherType.VIGENERE:
+        if not key:
+            raise ValueError("Key is required for vigenere cipher.")
+        return vigenere_decrypt(input_string, key)
+    elif cipher_type == CipherType.MORSE:
+        return morse_decode(input_string)
+    else:
+        raise ValueError(f"Unsupported cipher type: {cipher_type}")
 
 
 if __name__ == "__main__":
